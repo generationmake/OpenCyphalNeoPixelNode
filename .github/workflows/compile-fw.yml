@@ -1,0 +1,59 @@
+name: Compile
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/compile-fw.yml"
+      - "OpenCyphalNeoPixelNode.ino"
+
+  push:
+    paths:
+      - ".github/workflows/compile-fw.yml"
+      - "OpenCyphalNeoPixelNode.ino"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      SKETCHES_REPORTS_PATH: sketches-reports
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: adafruit:samd:adafruit_feather_m4_can
+            platforms: |
+              - name: adafruit:samd
+                source-url: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Compile
+        uses: arduino/compile-sketches@main
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          enable-deltas-report: true
+          libraries: |
+            - source-path: ./
+            - source-url: https://github.com/107-systems/107-Arduino-Cyphal.git
+            - name: I2C_Eeprom
+            - source-url: https://github.com/adafruit/Adafruit_SleepyDog.git
+            - source-url: https://github.com/adafruit/Adafruit_NeoPixel.git
+            - source-url: https://github.com/adafruit/Adafruit_NeoPixel_ZeroDMA.git
+            - source-url: https://github.com/adafruit/arduino-CAN
+
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+          sketch-paths: ./
+
+      - name: Save memory usage change report as artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          path: ${{ env.SKETCHES_REPORTS_PATH }}
