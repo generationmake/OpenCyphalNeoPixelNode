@@ -41,7 +41,7 @@ jobs:
           enable-deltas-report: true
           libraries: |
             - source-path: ./
-            - source-url: https://github.com/107-systems/107-Arduino-Cyphal.git
+            - source-url: https://github.com/107-systems/107-Arduino-Cyphal/archive/refs/heads/register-api.zip
             - name: I2C_Eeprom
             - source-url: https://github.com/adafruit/Adafruit_SleepyDog.git
             - source-url: https://github.com/adafruit/Adafruit_NeoPixel.git

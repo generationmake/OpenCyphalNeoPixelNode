@@ -17,7 +17,6 @@
 #include <CAN.h>
 
 #include <107-Arduino-Cyphal.h>
-#include <107-Arduino-MCP2515.h>
 //#include <Adafruit_SleepyDog.h>
 #include <Adafruit_NeoPixel.h>
 
