@@ -106,7 +106,7 @@ static uint16_t updateinterval_light=250;
 /* REGISTER ***************************************************************************/
 
 static RegisterNatural8  reg_rw_uavcan_node_id                        ("uavcan.node.id",                         Register::Access::ReadWrite, AUX_CONTROLLER_NODE_ID,                  [&node_hdl](RegisterNatural8 const & reg) { node_hdl.setNodeId(reg.get()); });
-static RegisterString    reg_ro_uavcan_node_description               ("uavcan.node.description",                Register::Access::ReadWrite, "L3X-Z AUX_CONTROLLER",                  nullptr);
+static RegisterString    reg_ro_uavcan_node_description               ("uavcan.node.description",                Register::Access::ReadWrite, "NeoPixel light controller",             nullptr);
 static RegisterNatural16 reg_ro_uavcan_sub_led1_id                    ("uavcan.sub.led1.id",                     Register::Access::ReadOnly,  ID_LED1,                                 nullptr);
 static RegisterString    reg_ro_uavcan_sub_led1_type                  ("uavcan.sub.led1.type",                   Register::Access::ReadOnly,  "uavcan.primitive.scalar.Bit.1.0",       nullptr);
 static RegisterNatural16 reg_ro_uavcan_sub_lightmode_id               ("uavcan.sub.lightmode.id",                Register::Access::ReadOnly,  ID_LIGHT_MODE,                           nullptr);
@@ -217,6 +217,7 @@ void setup()
 
 void loop()
 {
+  Serial.println("ping");  // somehow needed
   /* Process all pending OpenCyphal actions.
    */
   node_hdl.spinSome();
