@@ -18,7 +18,7 @@
 
 #include <107-Arduino-Cyphal.h>
 //#include <Adafruit_SleepyDog.h>
-#include <Adafruit_NeoPixel.h>
+#include <Adafruit_NeoPixel_ZeroDMA.h>
 
 #include "NodeInfo.h"
 
@@ -27,7 +27,7 @@
  **************************************************************************************/
 
 // Which pin on the Arduino is connected to the NeoPixels?
-#define NEOPIXELPIN        13 // Raspberry Pi Pico
+#define NEOPIXELPIN        12 // SAMD51 DMA
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS 8 // Popular NeoPixel ring size
@@ -100,7 +100,7 @@ static RegisterList      reg_list;
 Heartbeat_1_0<> hb;
 Integer8_1_0<ID_LIGHT_MODE> uavcan_light_mode;
 
-Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXELPIN, NEO_GRB);
+Adafruit_NeoPixel_ZeroDMA pixels(NUMPIXELS, NEOPIXELPIN, NEO_GRB);
 
 void light_off()
 {
