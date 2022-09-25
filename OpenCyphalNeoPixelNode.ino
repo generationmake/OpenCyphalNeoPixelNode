@@ -3,7 +3,7 @@
  *
  * Hardware:
  *   - Adafruit Feather M4 CAN Express
- *   
+ *
  *   use this CAN library: https://github.com/adafruit/arduino-CAN
  *
  * Used Subject-IDs
@@ -152,7 +152,7 @@ void setup()
   digitalWrite(PIN_CAN_STANDBY, false); // turn off STANDBY
   pinMode(PIN_CAN_BOOSTEN, OUTPUT);
   digitalWrite(PIN_CAN_BOOSTEN, true); // turn on booster
-  
+
  /* start the CAN bus at 250 kbps */
   if (!CAN.begin(250E3)) {
     Serial.println("Starting CAN failed!");
@@ -322,7 +322,7 @@ void loop()
 void onReceive(int packetSize) {
   // received a packet
   if (CAN.packetRtr()) {
-  } 
+  }
   else {
     static CanardFrame frame;
     static char payload[8];
