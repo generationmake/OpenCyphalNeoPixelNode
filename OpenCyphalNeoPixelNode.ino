@@ -17,7 +17,7 @@
 #include <CAN.h>
 
 #include <107-Arduino-Cyphal.h>
-//#include <Adafruit_SleepyDog.h>
+#include <Adafruit_SleepyDog.h>
 #include <Adafruit_NeoPixel_ZeroDMA.h>
 
 #include "NodeInfo.h"
@@ -44,7 +44,7 @@ using namespace uavcan::primitive::scalar;
  * CONSTANTS
  **************************************************************************************/
 
-static CanardNodeID const AUX_CONTROLLER_NODE_ID = 43;
+static CanardNodeID const NEOPIXEL_NODE_ID = 43;
 
 static CanardPortID const ID_LED1                 = 1005U;
 static CanardPortID const ID_LIGHT_MODE           = 2010U;
@@ -82,19 +82,19 @@ void onAccess_1_0_Request_Received(CanardRxTransfer const &, Node &);
  * GLOBAL VARIABLES
  **************************************************************************************/
 
-Node node_hdl(transmitCanFrame, AUX_CONTROLLER_NODE_ID);
+Node node_hdl(transmitCanFrame, NEOPIXEL_NODE_ID);
 
 static uint16_t updateinterval_light=250;
 
 /* REGISTER ***************************************************************************/
 
-static RegisterNatural8  reg_rw_uavcan_node_id                        ("uavcan.node.id",                         Register::Access::ReadWrite, AUX_CONTROLLER_NODE_ID,                  [&node_hdl](RegisterNatural8 const & reg) { node_hdl.setNodeId(reg.get()); });
-static RegisterString    reg_ro_uavcan_node_description               ("uavcan.node.description",                Register::Access::ReadWrite, "NeoPixel light controller",             nullptr);
-static RegisterNatural16 reg_ro_uavcan_sub_led1_id                    ("uavcan.sub.led1.id",                     Register::Access::ReadOnly,  ID_LED1,                                 nullptr);
-static RegisterString    reg_ro_uavcan_sub_led1_type                  ("uavcan.sub.led1.type",                   Register::Access::ReadOnly,  "uavcan.primitive.scalar.Bit.1.0",       nullptr);
-static RegisterNatural16 reg_ro_uavcan_sub_lightmode_id               ("uavcan.sub.lightmode.id",                Register::Access::ReadOnly,  ID_LIGHT_MODE,                           nullptr);
-static RegisterString    reg_ro_uavcan_sub_lightmode_type             ("uavcan.sub.lightmode.type",              Register::Access::ReadOnly,  "uavcan.primitive.scalar.Integer8.1.0",  nullptr);
-static RegisterNatural16 reg_rw_aux_updateinterval_light              ("aux.updateinterval.light",               Register::Access::ReadWrite, updateinterval_light,                    [&node_hdl](RegisterNatural16 const & reg) { updateinterval_light=reg.get(); if(updateinterval_light<100) updateinterval_light=100; });
+static RegisterNatural8  reg_rw_uavcan_node_id            ("uavcan.node.id",            Register::Access::ReadWrite, NEOPIXEL_NODE_ID,                        [&node_hdl](RegisterNatural8 const & reg) { node_hdl.setNodeId(reg.get()); });
+static RegisterString    reg_ro_uavcan_node_description   ("uavcan.node.description",   Register::Access::ReadWrite, "NeoPixel light controller",             nullptr);
+static RegisterNatural16 reg_ro_uavcan_sub_led1_id        ("uavcan.sub.led1.id",        Register::Access::ReadOnly,  ID_LED1,                                 nullptr);
+static RegisterString    reg_ro_uavcan_sub_led1_type      ("uavcan.sub.led1.type",      Register::Access::ReadOnly,  "uavcan.primitive.scalar.Bit.1.0",       nullptr);
+static RegisterNatural16 reg_ro_uavcan_sub_lightmode_id   ("uavcan.sub.lightmode.id",   Register::Access::ReadOnly,  ID_LIGHT_MODE,                           nullptr);
+static RegisterString    reg_ro_uavcan_sub_lightmode_type ("uavcan.sub.lightmode.type", Register::Access::ReadOnly,  "uavcan.primitive.scalar.Integer8.1.0",  nullptr);
+static RegisterNatural16 reg_rw_aux_updateinterval_light  ("aux.updateinterval.light",  Register::Access::ReadWrite, updateinterval_light,                    [&node_hdl](RegisterNatural16 const & reg) { updateinterval_light=reg.get(); if(updateinterval_light<100) updateinterval_light=100; });
 static RegisterList      reg_list;
 
 Heartbeat_1_0<> hb;
@@ -139,7 +139,7 @@ void light_amber()
 
 void setup()
 {
-//  Watchdog.enable(1000);
+  Watchdog.enable(1000);
 
   Serial.begin(115200);
 
@@ -311,7 +311,7 @@ void loop()
   }
 
   /* Feed the watchdog to keep it from biting. */
-//  Watchdog.reset();
+  Watchdog.reset();
 }
 
 /**************************************************************************************
