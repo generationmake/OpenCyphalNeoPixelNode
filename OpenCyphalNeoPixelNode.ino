@@ -30,7 +30,7 @@
 #define NEOPIXELPIN        12 // SAMD51 DMA
 
 // How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 8 // Popular NeoPixel ring size
+#define NUMPIXELS 12 // Popular NeoPixel ring size
 
 /**************************************************************************************
  * NAMESPACE
@@ -221,7 +221,7 @@ void loop()
     is_light_on = !is_light_on;
     static int running_light_counter = 0;
     running_light_counter ++;
-    if(running_light_counter>=8) running_light_counter=0;
+    if(running_light_counter>=NUMPIXELS) running_light_counter=0;
 
     if (uavcan_light_mode.data.value == LIGHT_MODE_RED)
       light_red();
@@ -238,46 +238,46 @@ void loop()
       if (uavcan_light_mode.data.value == LIGHT_MODE_RUN_RED)
       {
         pixels.setPixelColor(running_light_counter, pixels.Color(55, 0, 0));
-        pixels.setPixelColor((running_light_counter+7)%8, pixels.Color(27, 0, 0));
-        pixels.setPixelColor((running_light_counter+6)%8, pixels.Color(14, 0, 0));
-        pixels.setPixelColor((running_light_counter+5)%8, pixels.Color(7, 0, 0));
-        pixels.setPixelColor((running_light_counter+4)%8, pixels.Color(0, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-1)%NUMPIXELS, pixels.Color(27, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-2)%NUMPIXELS, pixels.Color(14, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-3)%NUMPIXELS, pixels.Color(7, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-4)%NUMPIXELS, pixels.Color(0, 0, 0));
         pixels.show();
       }
       else if (uavcan_light_mode.data.value == LIGHT_MODE_RUN_GREEN)
       {
         pixels.setPixelColor(running_light_counter, pixels.Color(0, 55, 0));
-        pixels.setPixelColor((running_light_counter+7)%8, pixels.Color(0, 27, 0));
-        pixels.setPixelColor((running_light_counter+6)%8, pixels.Color(0, 14, 0));
-        pixels.setPixelColor((running_light_counter+5)%8, pixels.Color(0, 7, 0));
-        pixels.setPixelColor((running_light_counter+4)%8, pixels.Color(0, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-1)%NUMPIXELS, pixels.Color(0, 27, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-2)%NUMPIXELS, pixels.Color(0, 14, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-3)%NUMPIXELS, pixels.Color(0, 7, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-4)%NUMPIXELS, pixels.Color(0, 0, 0));
         pixels.show();
       }
       else if (uavcan_light_mode.data.value == LIGHT_MODE_RUN_BLUE)
       {
         pixels.setPixelColor(running_light_counter, pixels.Color(0, 0, 55));
-        pixels.setPixelColor((running_light_counter+7)%8, pixels.Color(0, 0, 27));
-        pixels.setPixelColor((running_light_counter+6)%8, pixels.Color(0, 0, 14));
-        pixels.setPixelColor((running_light_counter+5)%8, pixels.Color(0, 0, 7));
-        pixels.setPixelColor((running_light_counter+4)%8, pixels.Color(0, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-1)%NUMPIXELS, pixels.Color(0, 0, 27));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-2)%NUMPIXELS, pixels.Color(0, 0, 14));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-3)%NUMPIXELS, pixels.Color(0, 0, 7));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-4)%NUMPIXELS, pixels.Color(0, 0, 0));
         pixels.show();
       }
       else if (uavcan_light_mode.data.value == LIGHT_MODE_RUN_WHITE)
       {
         pixels.setPixelColor(running_light_counter, pixels.Color(55, 55, 55));
-        pixels.setPixelColor((running_light_counter+7)%8, pixels.Color(27, 27, 27));
-        pixels.setPixelColor((running_light_counter+6)%8, pixels.Color(14, 14, 14));
-        pixels.setPixelColor((running_light_counter+5)%8, pixels.Color(7, 7, 7));
-        pixels.setPixelColor((running_light_counter+4)%8, pixels.Color(0, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-1)%NUMPIXELS, pixels.Color(27, 27, 27));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-2)%NUMPIXELS, pixels.Color(14, 14, 14));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-3)%NUMPIXELS, pixels.Color(7, 7, 7));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-4)%NUMPIXELS, pixels.Color(0, 0, 0));
         pixels.show();
       }
       else if (uavcan_light_mode.data.value == LIGHT_MODE_RUN_AMBER)
       {
         pixels.setPixelColor(running_light_counter, pixels.Color(55, 40, 0));
-        pixels.setPixelColor((running_light_counter+7)%8, pixels.Color(27, 20, 0));
-        pixels.setPixelColor((running_light_counter+6)%8, pixels.Color(14, 10, 0));
-        pixels.setPixelColor((running_light_counter+5)%8, pixels.Color(7, 5, 0));
-        pixels.setPixelColor((running_light_counter+4)%8, pixels.Color(0, 0, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-1)%NUMPIXELS, pixels.Color(27, 20, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-2)%NUMPIXELS, pixels.Color(14, 10, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-3)%NUMPIXELS, pixels.Color(7, 5, 0));
+        pixels.setPixelColor((running_light_counter+NUMPIXELS-4)%NUMPIXELS, pixels.Color(0, 0, 0));
         pixels.show();
       }
     }
