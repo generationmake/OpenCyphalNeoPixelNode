@@ -21,6 +21,8 @@
 //#include <Adafruit_SleepyDog.h>
 #include <Adafruit_NeoPixel.h>
 
+#include "NodeInfo.h"
+
 /**************************************************************************************
  * DEFINES
  **************************************************************************************/
@@ -82,24 +84,6 @@ void onAccess_1_0_Request_Received(CanardRxTransfer const &, Node &);
  **************************************************************************************/
 
 Node node_hdl(transmitCanFrame, AUX_CONTROLLER_NODE_ID);
-
-static const uavcan_node_GetInfo_Response_1_0 GET_INFO_DATA = {
-    /// uavcan.node.Version.1.0 protocol_version
-    {1, 0},
-    /// uavcan.node.Version.1.0 hardware_version
-    {1, 0},
-    /// uavcan.node.Version.1.0 software_version
-    {0, 1},
-    /// saturated uint64 software_vcs_revision_id
-    NULL,
-    /// saturated uint8[16] unique_id
-    {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-     0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff},
-    /// saturated uint8[<=50] name
-    {
-        "generationmake.NeoPixelNode",
-        strlen("generationmake.NeoPixelNode")},
-};
 
 static uint16_t updateinterval_light=250;
 
@@ -393,8 +377,8 @@ void onLightMode_Received(CanardRxTransfer const & transfer, Node & /* node_hdl 
 
 void onGetInfo_1_0_Request_Received(CanardRxTransfer const &transfer, Node & node_hdl)
 {
-  GetInfo_1_0::Response<> rsp = GetInfo_1_0::Response<>();
-  rsp.data = GET_INFO_DATA;
   Serial.println("onGetInfo_1_0_Request_Received");
+  GetInfo_1_0::Response<> rsp = GetInfo_1_0::Response<>();
+  memcpy(&rsp.data, &NODE_INFO, sizeof(uavcan_node_GetInfo_Response_1_0));
   node_hdl.respond(rsp, transfer.metadata.remote_node_id, transfer.metadata.transfer_id);
 }
