@@ -17,16 +17,16 @@
 /**************************************************************************************
  * DEFINES
  **************************************************************************************/
-
+/*
 #define ATSAME5x_SERIAL_NUMBER_WORD_0  *(volatile uint32_t*)(0x008061FC)
 #define ATSAME5x_SERIAL_NUMBER_WORD_1  *(volatile uint32_t*)(0x00806010)
 #define ATSAME5x_SERIAL_NUMBER_WORD_2  *(volatile uint32_t*)(0x00806014)
 #define ATSAME5x_SERIAL_NUMBER_WORD_3  *(volatile uint32_t*)(0x00806018)
-
+*/
 /**************************************************************************************
  * TYPEDEF
  **************************************************************************************/
-
+/*
 union UniqueId
 {
   struct __attribute__((packed))
@@ -35,11 +35,11 @@ union UniqueId
   } word_buf;
   uint8_t byte_buf[16];
 };
-
+*/
 /**************************************************************************************
  * CONSTANTS
  **************************************************************************************/
-
+/*
 UniqueId const UNIQUE_ID = []()
 {
   UniqueId uid;
@@ -49,28 +49,29 @@ UniqueId const UNIQUE_ID = []()
   uid.word_buf.w3 = ATSAME5x_SERIAL_NUMBER_WORD_3;
   return uid;
 } ();
-
-static const uavcan_node_GetInfo_Response_1_0 NODE_INFO = {
+*/
+static NodeInfo node_info
+(
+//static const uavcan_node_GetInfo_Response_1_0 NODE_INFO = {
     /* uavcan.node.Version.1.0 protocol_version */
-    {1, 0},
+    1, 0,
     /* uavcan.node.Version.1.0 hardware_version */
-    {1, 0},
+    1, 0,
     /* uavcan.node.Version.1.0 software_version */
-    {0, 1},
+    0, 1,
     /* saturated uint64 software_vcs_revision_id */
-    NULL,
+    0,
     /* saturated uint8[16] unique_id */
-    {
+    (UniqueId16Array) {0},
+//    OpenCyphalUniqueId(),
+/*    {
       UNIQUE_ID.byte_buf[ 0], UNIQUE_ID.byte_buf[ 1], UNIQUE_ID.byte_buf[ 2], UNIQUE_ID.byte_buf[ 3],
       UNIQUE_ID.byte_buf[ 4], UNIQUE_ID.byte_buf[ 5], UNIQUE_ID.byte_buf[ 6], UNIQUE_ID.byte_buf[ 7],
       UNIQUE_ID.byte_buf[ 8], UNIQUE_ID.byte_buf[ 9], UNIQUE_ID.byte_buf[10], UNIQUE_ID.byte_buf[11],
       UNIQUE_ID.byte_buf[12], UNIQUE_ID.byte_buf[13], UNIQUE_ID.byte_buf[14], UNIQUE_ID.byte_buf[15]
-    },
+    },*/
     /* saturated uint8[<=50] name */
-    {
-        "generationmake.NeoPixelNode",
-        strlen("generationmake.NeoPixelNode")
-    },
-};
+    "generationmake.NeoPixelNode"
+);
 
 #endif /* NODE_INFO_H_ */
