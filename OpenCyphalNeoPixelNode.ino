@@ -77,16 +77,10 @@ bool transmitCanFrame(CanardFrame const & frame);
 void onLed1_Received (CanardRxTransfer const &, Node &);
 void onLightMode_Received(CanardRxTransfer const &, Node &);
 
-/* Cyphal Service Requests */
-//void onList_1_0_Request_Received(CanardRxTransfer const &, Node &);
-//void onGetInfo_1_0_Request_Received(CanardRxTransfer const &, Node &);
-//void onAccess_1_0_Request_Received(CanardRxTransfer const &, Node &);
-
 /**************************************************************************************
  * GLOBAL VARIABLES
  **************************************************************************************/
 
-//Node node_hdl(transmitCanFrame, NEOPIXEL_NODE_ID);
 CyphalHeap<Node::DEFAULT_O1HEAP_SIZE> node_heap;
 Node node_hdl(node_heap.data(), node_heap.size(), NEOPIXEL_NODE_ID);
 
@@ -175,7 +169,6 @@ void setup()
   hb.data.vendor_specific_status_code = 0;
 
   /* Subscribe to the GetInfo request */
-//  node_hdl.subscribe<GetInfo_1_0::Request<>>(onGetInfo_1_0_Request_Received);
   node_info.subscribe(node_hdl);
 
   reg_list.add(reg_rw_uavcan_node_id);
@@ -381,11 +374,3 @@ void onLightMode_Received(CanardRxTransfer const & transfer, Node & /* node_hdl 
 {
   uavcan_light_mode = Integer8_1_0<ID_LIGHT_MODE>::deserialize(transfer);
 }
-/*
-void onGetInfo_1_0_Request_Received(CanardRxTransfer const &transfer, Node & node_hdl)
-{
-  Serial.println("onGetInfo_1_0_Request_Received");
-  GetInfo_1_0::Response<> rsp = GetInfo_1_0::Response<>();
-  memcpy(&rsp.data, &NODE_INFO, sizeof(uavcan_node_GetInfo_Response_1_0));
-  node_hdl.respond(rsp, transfer.metadata.remote_node_id, transfer.metadata.transfer_id);
-}*/
