@@ -20,6 +20,10 @@
 #include <Adafruit_SleepyDog.h>
 #include <Adafruit_NeoPixel_ZeroDMA.h>
 
+#undef max
+#undef min
+#include <algorithm>
+
 #include "NodeInfo.h"
 
 /**************************************************************************************
@@ -73,28 +77,24 @@ bool transmitCanFrame(CanardFrame const & frame);
 void onLed1_Received (CanardRxTransfer const &, Node &);
 void onLightMode_Received(CanardRxTransfer const &, Node &);
 
-/* Cyphal Service Requests */
-void onList_1_0_Request_Received(CanardRxTransfer const &, Node &);
-void onGetInfo_1_0_Request_Received(CanardRxTransfer const &, Node &);
-void onAccess_1_0_Request_Received(CanardRxTransfer const &, Node &);
-
 /**************************************************************************************
  * GLOBAL VARIABLES
  **************************************************************************************/
 
-Node node_hdl(transmitCanFrame, NEOPIXEL_NODE_ID);
+CyphalHeap<Node::DEFAULT_O1HEAP_SIZE> node_heap;
+Node node_hdl(node_heap.data(), node_heap.size(), NEOPIXEL_NODE_ID);
 
-static uint16_t updateinterval_light=250;
+static uint16_t update_period_ms_light=250;
 
 /* REGISTER ***************************************************************************/
 
-static RegisterNatural8  reg_rw_uavcan_node_id            ("uavcan.node.id",            Register::Access::ReadWrite, NEOPIXEL_NODE_ID,                        [&node_hdl](RegisterNatural8 const & reg) { node_hdl.setNodeId(reg.get()); });
-static RegisterString    reg_ro_uavcan_node_description   ("uavcan.node.description",   Register::Access::ReadWrite, "NeoPixel light controller",             nullptr);
-static RegisterNatural16 reg_ro_uavcan_sub_led1_id        ("uavcan.sub.led1.id",        Register::Access::ReadOnly,  ID_LED1,                                 nullptr);
-static RegisterString    reg_ro_uavcan_sub_led1_type      ("uavcan.sub.led1.type",      Register::Access::ReadOnly,  "uavcan.primitive.scalar.Bit.1.0",       nullptr);
-static RegisterNatural16 reg_ro_uavcan_sub_lightmode_id   ("uavcan.sub.lightmode.id",   Register::Access::ReadOnly,  ID_LIGHT_MODE,                           nullptr);
-static RegisterString    reg_ro_uavcan_sub_lightmode_type ("uavcan.sub.lightmode.type", Register::Access::ReadOnly,  "uavcan.primitive.scalar.Integer8.1.0",  nullptr);
-static RegisterNatural16 reg_rw_aux_updateinterval_light  ("aux.updateinterval.light",  Register::Access::ReadWrite, updateinterval_light,                    [&node_hdl](RegisterNatural16 const & reg) { updateinterval_light=reg.get(); if(updateinterval_light<100) updateinterval_light=100; });
+static RegisterNatural8  reg_rw_uavcan_node_id             ("uavcan.node.id",             Register::Access::ReadWrite, Register::Persistent::No, NEOPIXEL_NODE_ID,                        [&node_hdl](uint8_t const & val) { node_hdl.setNodeId(val); });
+static RegisterString    reg_ro_uavcan_node_description    ("uavcan.node.description",    Register::Access::ReadWrite, Register::Persistent::No, "NeoPixel light controller",             nullptr);
+static RegisterNatural16 reg_ro_uavcan_sub_led1_id         ("uavcan.sub.led1.id",         Register::Access::ReadOnly,  Register::Persistent::No, ID_LED1,                                 nullptr);
+static RegisterString    reg_ro_uavcan_sub_led1_type       ("uavcan.sub.led1.type",       Register::Access::ReadOnly,  Register::Persistent::No, "uavcan.primitive.scalar.Bit.1.0",       nullptr);
+static RegisterNatural16 reg_ro_uavcan_sub_lightmode_id    ("uavcan.sub.lightmode.id",    Register::Access::ReadOnly,  Register::Persistent::No, ID_LIGHT_MODE,                           nullptr);
+static RegisterString    reg_ro_uavcan_sub_lightmode_type  ("uavcan.sub.lightmode.type",  Register::Access::ReadOnly,  Register::Persistent::No, "uavcan.primitive.scalar.Integer8.1.0",  nullptr);
+static RegisterNatural16 reg_rw_aux_update_period_ms_light ("aux.update_period_ms.light", Register::Access::ReadWrite, Register::Persistent::No, update_period_ms_light,                  nullptr, nullptr , [](uint16_t const & val) { return std::min(val, static_cast<uint16_t>(100)); });
 static RegisterList      reg_list;
 
 Heartbeat_1_0<> hb;
@@ -153,7 +153,7 @@ void setup()
   digitalWrite(PIN_CAN_BOOSTEN, true); // turn on booster
 
  /* start the CAN bus at 250 kbps */
-  if (!CAN.begin(250E3)) {
+  if (!CAN.begin(1000E3)) {
     Serial.println("Starting CAN failed!");
     while (1);
   }
@@ -169,15 +169,16 @@ void setup()
   hb.data.vendor_specific_status_code = 0;
 
   /* Subscribe to the GetInfo request */
-  node_hdl.subscribe<GetInfo_1_0::Request<>>(onGetInfo_1_0_Request_Received);
-  reg_list.subscribe(node_hdl);
+  node_info.subscribe(node_hdl);
+
   reg_list.add(reg_rw_uavcan_node_id);
   reg_list.add(reg_ro_uavcan_node_description);
   reg_list.add(reg_ro_uavcan_sub_led1_id);
   reg_list.add(reg_ro_uavcan_sub_lightmode_id);
   reg_list.add(reg_ro_uavcan_sub_led1_type);
   reg_list.add(reg_ro_uavcan_sub_lightmode_type);
-  reg_list.add(reg_rw_aux_updateinterval_light);
+  reg_list.add(reg_rw_aux_update_period_ms_light);
+  reg_list.subscribe(node_hdl);
   /* Subscribe to the reception of Bit message. */
   node_hdl.subscribe<Bit_1_0<ID_LED1>>(onLed1_Received);
   node_hdl.subscribe<Integer8_1_0<ID_LIGHT_MODE>>(onLightMode_Received);
@@ -203,7 +204,7 @@ void loop()
   Serial.println("ping");  // somehow needed
   /* Process all pending OpenCyphal actions.
    */
-  node_hdl.spinSome();
+  node_hdl.spinSome([](CanardFrame const & frame) -> bool { return transmitCanFrame(frame); });
 
   /* Publish all the gathered data, although at various
    * different intervals.
@@ -215,7 +216,7 @@ void loop()
   unsigned long const now = millis();
 
   /* light mode for neopixels */
-  if((now - prev_led) > updateinterval_light)
+  if((now - prev_led) > update_period_ms_light)
   {
     static bool is_light_on = false;
     is_light_on = !is_light_on;
@@ -372,12 +373,4 @@ void onLed1_Received(CanardRxTransfer const & transfer, Node & /* node_hdl */)
 void onLightMode_Received(CanardRxTransfer const & transfer, Node & /* node_hdl */)
 {
   uavcan_light_mode = Integer8_1_0<ID_LIGHT_MODE>::deserialize(transfer);
-}
-
-void onGetInfo_1_0_Request_Received(CanardRxTransfer const &transfer, Node & node_hdl)
-{
-  Serial.println("onGetInfo_1_0_Request_Received");
-  GetInfo_1_0::Response<> rsp = GetInfo_1_0::Response<>();
-  memcpy(&rsp.data, &NODE_INFO, sizeof(uavcan_node_GetInfo_Response_1_0));
-  node_hdl.respond(rsp, transfer.metadata.remote_node_id, transfer.metadata.transfer_id);
 }
